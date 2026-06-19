@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Учебный стенд Control Panel — вымышленные данные для практики">
+  <title>Control Panel — Practice</title>
+  <script>
+    try {
+      if (localStorage.getItem('itInventoryPracticeTheme') === 'dark') {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    } catch (error) {}
+  </script>
+  <link rel="stylesheet" href="css/main.css?v=9">
+  <link rel="stylesheet" href="css/02-tablet.css">
+  <link rel="stylesheet" href="css/04-mobile.css">
+  <link rel="stylesheet" href="css/05-small-mobile.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header__brand">
+        <span class="header__logo" aria-hidden="true">Demo</span>
+        <div>
+          <p class="header__eyebrow">Учебный стенд · вымышленные данные</p>
+          <h1 class="header__title">Control Panel — Practice</h1>
+        </div>
+      </div>
+      <div class="header__actions">
+        <p class="header__registry" id="ad-registry-meta"></p>
+        <button
+          class="header__theme"
+          type="button"
+          id="theme-toggle"
+          aria-label="Переключить тему"
+          aria-pressed="false"
+          title="Тёмная тема"
+        >☾</button>
+        <p class="header__user">Администратор: <strong>Demo Admin</strong></p>
+      </div>
+    </header>
+
+    <nav class="nav" aria-label="Разделы учёта">
+      <button class="nav__btn nav__btn--active" type="button" data-section="overview">Обзор</button>
+      <button class="nav__btn" type="button" data-section="workplaces">Рабочие места</button>
+      <button class="nav__btn" type="button" data-section="cash">Кассовое оборудование</button>
+      <button class="nav__btn" type="button" data-section="printers">Принтеры</button>
+    </nav>
+
+    <section class="toolbar" aria-label="Фильтры">
+      <label class="search">
+        <span class="visually-hidden">Поиск</span>
+        <input class="search__input" id="search" type="search" placeholder="Поиск по городу, сотруднику, модели…" autocomplete="off">
+      </label>
+      <label class="field field--select">
+        <span class="field__label">Город</span>
+        <select class="field__control" id="city-filter">
+          <option value="">Все города</option>
+        </select>
+      </label>
+      <label class="field field--select">
+        <span class="field__label">Организация</span>
+        <select class="field__control" id="organization-filter">
+          <option value="">Все организации</option>
+        </select>
+      </label>
+      <div class="toolbar__actions">
+        <button class="button button--ghost" id="workplace-bulk-move-toggle" type="button" hidden>Выбрать для переноса</button>
+        <button class="button button--ghost" id="workplace-bulk-move-cancel" type="button" hidden>Отмена</button>
+        <button class="button button--primary" id="workplace-bulk-move-submit" type="button" hidden disabled>Перенести</button>
+        <button class="button button--primary" id="add-workplace-button" type="button" data-add-type="workplace" hidden>+ Рабочее место</button>
+        <button class="button button--primary" id="add-cash-button" type="button" data-add-type="cash" hidden>+ Касса</button>
+        <button class="button button--primary" id="add-printer-button" type="button" data-add-type="printer" hidden>+ Принтер</button>
+      </div>
+    </section>
+
+    <main class="main" id="main-content"></main>
+    <p class="boot-error" id="boot-error" hidden role="alert"></p>
+  </div>
+
+  <dialog class="modal" id="detail-modal" aria-labelledby="modal-title">
+    <div class="modal__inner">
+      <button class="modal__close" type="button" id="modal-close" aria-label="Закрыть">×</button>
+      <h2 class="modal__title" id="modal-title">Карточка оборудования</h2>
+      <div class="modal__body" id="modal-body"></div>
+      <div class="modal__footer" id="modal-footer"></div>
+    </div>
+  </dialog>
+
+  <dialog class="modal modal--compact" id="move-location-dialog" aria-labelledby="move-location-title">
+    <div class="modal__inner">
+      <button class="modal__close" type="button" id="move-location-close" aria-label="Закрыть">×</button>
+      <h2 class="modal__title" id="move-location-title">Перенос</h2>
+      <div class="modal__body">
+        <p class="modal__meta" id="move-location-meta"></p>
+        <div class="form">
+          <label class="field field--select">
+            <span class="field__label">Город</span>
+            <select class="field__control" id="move-location-city"></select>
+          </label>
+          <label class="field field--select">
+            <span class="field__label">Локация</span>
+            <select class="field__control" id="move-location-location"></select>
+          </label>
+        </div>
+      </div>
+      <div class="modal__footer modal__footer--compact">
+        <button class="button button--ghost" type="button" id="move-location-cancel">Отмена</button>
+        <button class="button button--primary" type="button" id="move-location-submit">Перенести</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="form-modal" aria-labelledby="form-title">
+    <div class="modal__inner">
+      <button class="modal__close" type="button" id="form-close" aria-label="Закрыть">×</button>
+      <h2 class="modal__title" id="form-title">Добавить</h2>
+      <p class="form__message form__message--error" id="form-error" hidden></p>
+      <p class="form__message form__message--success" id="form-success" hidden></p>
+
+      <form class="form add-form" id="add-workplace-form" data-type="workplace" hidden novalidate>
+        <label class="field field--select">
+          <span class="field__label">Город</span>
+          <select class="field__control" name="city" required>
+            <option value="">Выберите город</option>
+          </select>
+        </label>
+        <label class="field field--select">
+          <span class="field__label">Локация</span>
+          <select class="field__control" name="location" required disabled>
+            <option value="">Сначала выберите город</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">Модель / железо</span>
+          <input class="field__control" name="model" type="text" required placeholder="HP ProBook 450">
+        </label>
+        <div id="workplace-add-fields"></div>
+        <label class="field">
+          <span class="field__label">Заметка</span>
+          <textarea class="field__control field__control--textarea" name="comment" rows="3" placeholder="Комментарий к рабочему месту"></textarea>
+        </label>
+        <div class="form__actions">
+          <button class="button button--ghost form-cancel" type="button">Отмена</button>
+          <button class="button button--primary" type="submit">Сохранить</button>
+        </div>
+      </form>
+
+      <form class="form add-form" id="add-cash-form" data-type="cash" hidden novalidate>
+        <label class="field field--select">
+          <span class="field__label">Город</span>
+          <select class="field__control" name="city" required>
+            <option value="">Выберите город</option>
+          </select>
+        </label>
+        <label class="field field--select">
+          <span class="field__label">Локация</span>
+          <select class="field__control" name="location" required disabled>
+            <option value="">Сначала выберите город</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">Модель кассы</span>
+          <input class="field__control" name="model" type="text" required placeholder="АТОЛ 55Ф">
+        </label>
+        <label class="field">
+          <span class="field__label">Номер терминала Сбербанка</span>
+          <input class="field__control" name="terminalNumber" type="text" placeholder="Укажите номер терминала">
+        </label>
+        <label class="field">
+          <span class="field__label">Окончание ФН</span>
+          <input class="field__control" name="fnExpiry" type="date">
+        </label>
+        <label class="field">
+          <span class="field__label">Окончание ОФД</span>
+          <input class="field__control" name="ofdExpiry" type="date">
+        </label>
+        <div class="form__actions">
+          <button class="button button--ghost form-cancel" type="button">Отмена</button>
+          <button class="button button--primary" type="submit">Сохранить</button>
+        </div>
+      </form>
+
+      <form class="form add-form" id="add-printer-form" data-type="printer" hidden novalidate>
+        <label class="field field--select">
+          <span class="field__label">Город</span>
+          <select class="field__control" name="city" required>
+            <option value="">Выберите город</option>
+          </select>
+        </label>
+        <label class="field field--select">
+          <span class="field__label">Локация</span>
+          <select class="field__control" name="location" required disabled>
+            <option value="">Сначала выберите город</option>
+          </select>
+        </label>
+        <div id="printer-add-model-field"></div>
+        <div id="printer-add-connection-fields"></div>
+        <label class="field field--select">
+          <span class="field__label">Тип принтера</span>
+          <select class="field__control" name="printerType">
+            <option value="mfp">МФУ</option>
+            <option value="thermal">Термопринтер</option>
+            <option value="laser">Лазерный</option>
+          </select>
+        </label>
+        <div class="form__actions">
+          <button class="button button--ghost form-cancel" type="button">Отмена</button>
+          <button class="button button--primary" type="submit">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="js/main.js?v=39"></script>
+</body>
+</html>

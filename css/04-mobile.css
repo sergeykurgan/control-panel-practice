@@ -1,0 +1,68 @@
+/* mobile — как airport-board-v18/css/04-shared-mobile.css · проверять 320px */
+@media (max-width: 600px) {
+  .app {
+    width: calc(100% - 20px);
+    margin: 16px auto 32px;
+  }
+
+  .header {
+    gap: 12px;
+  }
+
+  .header__actions {
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .header__registry {
+    width: 100%;
+    order: 3;
+    font-size: 12px;
+  }
+
+  .nav__btn {
+    flex: 1 1 calc(50% - 4px);
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 14px;
+  }
+
+  .toolbar .search,
+  .toolbar > .field:not([hidden]) {
+    flex: 1 1 100%;
+  }
+
+  .panel__title {
+    font-size: 18px;
+  }
+
+  .details__row,
+  .details div {
+    grid-template-columns: 1fr;
+  }
+
+  .cash-table-wrap {
+    display: none;
+  }
+
+  .workplace-table-wrap {
+    display: none;
+  }
+
+  .cash-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .cash-card {
+    min-height: 0;
+  }
+
+  .workplace-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

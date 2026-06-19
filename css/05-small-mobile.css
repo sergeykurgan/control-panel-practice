@@ -1,0 +1,16 @@
+/* small mobile — как airport-board-v18/css/05-small-mobile.css · проверять 280px */
+@media (max-width: 280px) {
+  .app {
+    width: calc(100% - 16px);
+    margin-top: 12px;
+  }
+
+  .nav__btn {
+    flex: 1 1 100%;
+    font-size: 13px;
+  }
+
+  .header__title {
+    font-size: 20px;
+  }
+}
